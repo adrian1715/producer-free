@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Producer - Focus Mode</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html {
+        width: 412px;
+        height: 522px !important;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
+          sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 16px;
+      }
+
+      .page {
+        height: 380px !important;
+        /* overflow-y: auto; */
+      }
+
+      .header {
+        /* margin-bottom: 16px; */
+        text-align: center;
+      }
+
+      .logo-img {
+        height: auto;
+        max-width: 90%;
+        vertical-align: middle;
+      }
+
+      .tagline {
+        font-size: 12px;
+        opacity: 0.8;
+      }
+
+      .main-controls {
+        text-align: center;
+      }
+
+      .status-indicator {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        margin: 0 auto 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        transition: all 0.3s ease;
+      }
+
+      .status-indicator.active {
+        background: rgba(46, 204, 113, 0.2);
+        border-color: #2ecc71;
+        box-shadow: 0 0 20px rgba(46, 204, 113, 0.3);
+      }
+
+      .status-indicator.inactive {
+        background: rgba(231, 76, 60, 0.2);
+        border-color: #e74c3c;
+      }
+
+      .session-status {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 16px;
+        margin: 16px 0;
+        text-align: center;
+      }
+
+      .session-status-text {
+        color: #e74c3c;
+        font-weight: 500;
+      }
+
+      .session-timer {
+        font-size: 28px;
+        font-weight: 700;
+        font-family: "Courier New", monospace;
+        margin: 8px 0 0 0;
+        letter-spacing: 2px;
+      }
+
+      .session-label {
+        font-size: 12px;
+        opacity: 0.8;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .controls {
+        margin-top: 16px;
+        display: flex;
+        /* justify-content: space-between; */
+        flex-direction: column;
+        /* gap: 8px; */
+      }
+
+      .controls div {
+        gap: 4px;
+      }
+
+      .settings-controls {
+        display: flex;
+        /* flex-direction: column; */
+        justify-content: space-between;
+        gap: 8px;
+        /* margin: 16px; */
+      }
+
+      .btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        padding: 12px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        font-family: inherit;
+        font-weight: 500;
+        transition: all 0.3s ease;
+      }
+
+      .btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-1px);
+      }
+
+      .btn-primary {
+        background: rgba(52, 152, 219, 0.3);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: rgba(52, 152, 219, 0.5);
+        box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+      }
+
+      .btn-success {
+        background: rgba(46, 204, 113, 0.3);
+        color: white;
+      }
+
+      .btn-success:hover {
+        background: rgba(46, 204, 113, 0.5);
+        box-shadow: 0 2px 8px rgba(46, 204, 113, 0.3);
+      }
+
+      .btn-danger {
+        background: rgba(231, 76, 60, 0.3);
+        color: white;
+      }
+
+      .btn-danger:hover {
+        background: rgba(231, 76, 60, 0.5);
+        box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+      }
+
+      .btn-small {
+        padding: 6px 8px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 11px;
+        font-family: inherit;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(5px);
+      }
+
+      .btn-xsmall {
+        padding: 4px 7px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 11px;
+        font-family: inherit;
+        font-weight: 500;
+        transition: all 0.3s ease;
+      }
+
+      .btn-small:hover,
+      .btn-xsmall:hover {
+        transform: translateY(-1px);
+      }
+
+      i {
+        font-size: 0.9rem;
+      }
+
+      #settings {
+        display: none;
+      }
+
+      #settings .section:first-child {
+        margin-top: 16px;
+      }
+
+      .toggle-btn {
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 25px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+      }
+
+      .toggle-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      }
+
+      .toggle-btn.active {
+        background: #e74c3c;
+        border-color: #e74c3c;
+      }
+
+      .toggle-btn.active:hover {
+        background: #c0392b;
+      }
+
+      .section {
+        margin: 16px 0;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 16px;
+        backdrop-filter: blur(10px);
+      }
+
+      .section-title {
+        justify-content: space-between;
+        display: flex;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .input-group {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+
+      input[type="text"],
+      select {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-size: 13px;
+      }
+
+      select option {
+        background: rgb(139, 127, 204);
+      }
+
+      input[type="text"]::placeholder {
+        color: rgba(255, 255, 255, 0.6);
+      }
+
+      .rule-item {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 10px;
+        margin-bottom: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .rule-info {
+        flex: 1;
+      }
+
+      .rule-url {
+        font-size: 12px;
+        font-weight: 500;
+        margin-bottom: 2px;
+      }
+
+      .rule-type {
+        font-size: 10px;
+        opacity: 0.7;
+        text-transform: uppercase;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      .stat-card {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 12px;
+        text-align: center;
+      }
+
+      .stat-number {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+
+      .stat-label {
+        font-size: 11px;
+        opacity: 0.8;
+      }
+
+      .empty-state {
+        text-align: center;
+        opacity: 0.7;
+        font-size: 12px;
+        padding: 16px;
+      }
+
+      .scroll-container {
+        max-height: 75px;
+        overflow-y: auto;
+      }
+
+      .scroll-container::-webkit-scrollbar {
+        width: 4px;
+      }
+
+      .scroll-container::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 2px;
+      }
+
+      .scroll-container::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 2px;
+      }
+
+      .flex-row {
+        display: flex;
+        gap: 6px;
+      }
+    </style>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+    />
+  </head>
+  <body>
+    <div class="header">
+      <img src="producer-logo.png" alt="Producer logo" class="logo-img" />
+    </div>
+
+    <div id="main-controls" class="main-controls page">
+      <div class="status-indicator" id="statusIndicator">
+        <span id="statusIcon">🎯</span>
+      </div>
+      <button class="toggle-btn" id="toggleBtn">Start Producing</button>
+
+      <div class="session-status">
+        <div class="session-label">
+          <span id="sessionStatusText" class="session-status-text"
+            >Session Inactive</span
+          >
+        </div>
+        <div class="session-timer" id="sessionTimer">00:00:00</div>
+      </div>
+
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-number" id="blockedCount">0</div>
+          <div class="stat-label">Sites Blocked</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="focusedTime">00h00min</div>
+          <div class="stat-label">Focused Time</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="settingsBtn" class="btn">Settings</button>
+      </div>
+    </div>
+
+    <!-- SETTINGS PAGE  -->
+
+    <div id="settings" class="settings page">
+      <div class="section">
+        <div class="section-title">🚫 Add Block Rule</div>
+
+        <div class="input-group">
+          <select id="ruleType">
+            <option selected hidden>Select one option</option>
+            <option value="domain">Block Domain</option>
+            <option value="url">Block Specific URL</option>
+            <option value="allow">Allow Specific URL</option>
+            <option value="allowParam">Allow Parameter</option>
+          </select>
+        </div>
+
+        <div id="urlInputContainer" class="input-group" style="margin: 0">
+          <input
+            type="text"
+            id="urlInput"
+            placeholder="e.g., youtube.com or youtube.com/feed/trending"
+          />
+          <button id="addRule" class="btn" title="Add Rule">Add</button>
+        </div>
+
+        <div
+          id="paramInputsContainer"
+          class="input-group"
+          style="margin: 0; display: none"
+        >
+          <input
+            type="text"
+            id="paramKeyInput"
+            placeholder="Key (e.g., list)"
+            style="width: 50%"
+          />
+          <input
+            type="text"
+            id="paramValueInput"
+            placeholder="Value (optional)"
+            style="width: 50%"
+          />
+
+          <button id="addParamRule" class="btn">Add</button>
+        </div>
+
+        <!-- <div style="font-size: 11px; opacity: 0.8; margin-top: 4px">
+          💡 Use "Allow Specific URL" to whitelist specific pages
+        </div> -->
+      </div>
+
+      <div class="section" style="height: 145px">
+        <div class="section-title">
+          <span>📋 Active Rules (<span id="ruleCount">0</span>)</span>
+
+          <button
+            id="clearRulesBtn"
+            class="btn btn-xsmall btn-danger"
+            title="Clear Rules"
+            style="display: none"
+          >
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+
+        <div class="scroll-container">
+          <div id="rulesList">
+            <div class="empty-state">
+              No blocking rules configured yet.<br />
+              Add or import some rules to get started!
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-controls">
+        <button id="closeSettingsBtn" class="btn" style="width: 85%">
+          Back to Menu
+        </button>
+        <button
+          id="clearInfoBtn"
+          class="btn btn-small btn-danger"
+          title="Clear Info"
+          style="width: 15%"
+        >
+          <i class="bi bi-stars"></i>
+        </button>
+      </div>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
