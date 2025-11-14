@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Producer - Free Focus Mode Extension",
+  "name": "Producer - Free Focus Extension",
   "version": "1.0.0",
   "description": "Block distracting websites and URLs to boost your productivity",
   "web_accessible_resources": [
@@ -9,13 +9,7 @@
       "matches": ["<all_urls>"]
     }
   ],
-  "permissions": [
-    "storage",
-    "activeTab",
-    "declarativeNetRequest",
-    "tabs",
-    "scripting"
-  ],
+  "permissions": ["storage", "activeTab", "tabs"],
   "host_permissions": ["<all_urls>"],
   "background": {
     "service_worker": "background.js"
